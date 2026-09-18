@@ -25,6 +25,7 @@ interface Product {
   badge: string | null
   category: string
   soldOut: boolean
+  
 }
 
 export default function ShopPage() {
@@ -33,18 +34,22 @@ export default function ShopPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activeFilter, setActiveFilter] = useState('All')
 
+  // ⚠️ Product list — i-add ang bagong products dito
+  // Format: imageFront + imageBack (2 images per product)
   const products: Product[] = [
-  { 
-    id: 1, 
-    name: 'Black Tee', 
-    price: 899, 
-    imageFront: '/images/products/black-tee-front.jpg', 
-    imageBack: '/images/products/black-tee-back.jpg',
-    badge: 'New', 
-    category: 'Tees', 
-    soldOut: false 
-  },
-]
+    { 
+      id: 1, 
+      name: 'Black Tee', 
+      price: 899, 
+      imageFront: '/images/products/black-tee-front.jpg', 
+      imageBack: '/images/products/black-tee-back.jpg',
+       
+      
+      badge: 'New', 
+      category: 'Tees', 
+      soldOut: false 
+    },
+  ]
 
   const categories = ['All', 'Tees', 'Jackets', 'Pants', 'Shorts']
 
@@ -133,7 +138,7 @@ export default function ShopPage() {
               className="text-2xl font-black tracking-tight text-black"
               style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
             >
-              Stray4m
+              NostalManila
             </span>
           </Link>
 
@@ -211,35 +216,34 @@ export default function ShopPage() {
       {/* PRODUCT GRID */}
       <section className="px-6 pb-32">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 gap-y-20">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-20">
             {filteredProducts.map((product, i) => (
-              <div 
+                            <Link 
+                href={`/product/${product.id}`}
                 key={product.id} 
-                className={`group anim-fade-up delay-${(i + 1) * 100} cursor-pointer`}
-                onClick={() => !product.soldOut && addToCart(product)}
-              >
-                {/* Image Container */}
-                <div className="relative aspect-square overflow-hidden mb-6 bg-neutral-50">
-                  {/* Front Image */}
-                  <img
+                className={`group anim-fade-up delay-${(i + 1) * 100} cursor-pointer block`}
+                >
+             {/* Image Container - Walang border, transparent bg */}
+                <div className="relative aspect-square overflow-hidden mb-6">
+                {/* Front Image */}
+                <img
                     src={product.imageFront}
                     alt={product.name}
-                    className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ${
-                      product.soldOut 
+                    className={`absolute inset-0 w-full h-full object-contain transition-all duration-700 ${
+                    product.soldOut 
                         ? 'opacity-40' 
                         : 'group-hover:opacity-0'
                     }`}
-                  />
+                />
 
-                  {/* Back Image - Shows on hover */}
-                  {!product.soldOut && (
+                {/* Back Image - Shows on hover */}
+                {!product.soldOut && (
                     <img
-                      src={product.imageBack}
-                      alt={`${product.name} - back`}
-                      className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-all duration-700"
+                    src={product.imageBack}
+                    alt={`${product.name} - back`}
+                    className="absolute inset-0 w-full h-full object-contain opacity-0 group-hover:opacity-100 transition-all duration-700"
                     />
-                  )}
-
+                )}
                   {/* Sold Out Badge */}
                   {product.soldOut && (
                     <div className="absolute top-3 right-3 bg-white px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.15em] text-neutral-700 z-10">
@@ -257,7 +261,6 @@ export default function ShopPage() {
 
                 {/* Product Info - Name ↔ Price Swap */}
                 <div className="relative h-5 text-center overflow-hidden">
-                  {/* Name - Default */}
                   {!product.soldOut ? (
                     <>
                       <h3 
@@ -266,7 +269,6 @@ export default function ShopPage() {
                         {product.name}
                       </h3>
 
-                      {/* Price - Shows on hover */}
                       <p 
                         className="text-xs font-bold text-black uppercase tracking-[0.1em] transition-all duration-500 absolute inset-0 flex items-center justify-center opacity-0 translate-y-full group-hover:opacity-100 group-hover:translate-y-0"
                       >
@@ -279,7 +281,7 @@ export default function ShopPage() {
                     </p>
                   )}
                 </div>
-              </div>
+                </Link>
             ))}
           </div>
 
@@ -300,11 +302,10 @@ export default function ShopPage() {
                 className="text-2xl font-black mb-4 text-black"
                 style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
               >
-                Stray4m
+                NostalManila
               </h4>
               <p className="text-neutral-500 text-sm max-w-md mb-6 leading-relaxed">
-                Premium streetwear for the dreamers. Peso dreams, diamond goals — 
-                chasing dreams, not crowds.
+                Premium streetwear for the dreamers. Proudly Filipino.
               </p>
               <div className="flex items-center gap-3">
                 <a href="#" className="p-2 hover:bg-black hover:text-white transition-all">
@@ -349,7 +350,7 @@ export default function ShopPage() {
           </div>
 
           <div className="pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-neutral-400">
-            <p>© 2026 STRAYFM. All rights reserved.</p>
+            <p>© 2026 NOSTALMANILA. All rights reserved.</p>
             <div className="flex gap-6">
               <a href="#" className="hover:text-black transition-colors">Privacy</a>
               <a href="#" className="hover:text-black transition-colors">Terms</a>
@@ -399,7 +400,7 @@ export default function ShopPage() {
                         <img
                           src={item.image}
                           alt={item.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-contain p-1"
                         />
                       </div>
                       <div className="flex-1 min-w-0">

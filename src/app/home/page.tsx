@@ -863,7 +863,6 @@ export default function HomePage() {
                 </a>
               </div>
             </div>
-
             <div>
               <h5 className="text-xs font-bold uppercase tracking-wider mb-4">Shop</h5>
               <ul className="space-y-2 text-sm text-neutral-500">

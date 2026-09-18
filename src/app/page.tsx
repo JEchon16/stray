@@ -30,7 +30,7 @@ export default function LandingPage() {
           }`}
           style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
         >
-          Stray4m
+          NostalManila
         </h1>
 
         {/* Navigation Options */}
@@ -63,7 +63,7 @@ export default function LandingPage() {
           mounted ? 'opacity-100' : 'opacity-0'
         }`}
       >
-        © 2026 STRAYFM
+        © 2026 NOSTALMANILA. All rights reserved.
       </div>
     </div>
   )
