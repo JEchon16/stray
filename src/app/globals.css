@@ -1,12 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0A0A0A;
-  --background-alt: #111111;
-  --surface: #1A1A1A;
-  --foreground: #FAFAFA;
-  --foreground-muted: #A3A3A3;
-  --border: #262626;
+  --background: #FFFFFF;
+  --background-alt: #F5F5F5;
+  --foreground: #0A0A0A;
+  --foreground-muted: #6B6B6B;
+  --border: #E5E5E5;
 }
 
 body {
@@ -21,14 +20,19 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0A0A0A;
+  background: #F5F5F5;
 }
 ::-webkit-scrollbar-thumb {
-  background: #333;
+  background: #D4D4D4;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #A3A3A3;
+}
+
+::selection {
+  background: #0A0A0A;
+  color: white;
 }
 
 /* ============================================
@@ -67,10 +71,6 @@ body {
   animation: zoomSlow 6s ease-out both;
 }
 
-.anim-marquee {
-  animation: marquee 30s linear infinite;
-}
-
 .delay-100 { animation-delay: 0.1s; }
 .delay-200 { animation-delay: 0.2s; }
 .delay-300 { animation-delay: 0.3s; }
@@ -94,7 +94,7 @@ body {
 }
 
 .hover-zoom:hover img {
-  transform: scale(1.08);
+  transform: scale(1.05);
 }
 
 /* ============================================
@@ -134,14 +134,8 @@ body {
   animation: marquee 30s linear infinite;
 }
 
-/* Hide zoom on mobile for performance */
-@media (max-width: 768px) {
-  .anim-zoom {
-    animation: none;
-  }
-}
 /* ============================================
-   FLOATING RING LOGOS - LOOKBOOK SECTION
+   FLOATING RING LOGOS
    ============================================ */
 
 @keyframes ring-fade-cycle {
@@ -150,7 +144,7 @@ body {
     transform: scale(0.9) rotate(-5deg);
   }
   50% {
-    opacity: 0.08;
+    opacity: 0.15;
     transform: scale(1) rotate(0deg);
   }
   100% {
@@ -165,7 +159,7 @@ body {
     transform: scale(1.1) rotate(5deg);
   }
   50% {
-    opacity: 0.06;
+    opacity: 0.12;
     transform: scale(1) rotate(0deg);
   }
   100% {
@@ -178,31 +172,32 @@ body {
   position: absolute;
   pointer-events: none;
   user-select: none;
-  filter: grayscale(100%);
 }
 
 .ring-anim-1 {
-  animation: ring-fade-cycle 2s ease-in-out infinite;
+  animation: ring-fade-cycle 3s ease-in-out infinite;
 }
 
 .ring-anim-2 {
-  animation: ring-fade-cycle-alt 2s ease-in-out infinite;
-  animation-delay: 0.5s;
+  animation: ring-fade-cycle-alt 3s ease-in-out infinite;
+  animation-delay: 0.75s;
 }
 
 .ring-anim-3 {
-  animation: ring-fade-cycle 2s ease-in-out infinite;
-  animation-delay: 1s;
-}
-
-.ring-anim-4 {
-  animation: ring-fade-cycle-alt 2s ease-in-out infinite;
+  animation: ring-fade-cycle 3s ease-in-out infinite;
   animation-delay: 1.5s;
 }
 
-/* Hide on mobile for performance */
+.ring-anim-4 {
+  animation: ring-fade-cycle-alt 3s ease-in-out infinite;
+  animation-delay: 2.25s;
+}
+
 @media (max-width: 768px) {
   .floating-ring {
     display: none;
+  }
+  .anim-zoom {
+    animation: none;
   }
 }
