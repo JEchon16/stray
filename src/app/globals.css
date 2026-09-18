@@ -1,26 +1,208 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #0A0A0A;
+  --background-alt: #111111;
+  --surface: #1A1A1A;
+  --foreground: #FAFAFA;
+  --foreground-muted: #A3A3A3;
+  --border: #262626;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0A0A0A;
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zoomSlow {
+  from { transform: scale(1); }
+  to { transform: scale(1.08); }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.anim-fade-up {
+  animation: fadeInUp 0.8s ease-out both;
+}
+
+.anim-fade-in {
+  animation: fadeIn 1s ease-out both;
+}
+
+.anim-zoom {
+  animation: zoomSlow 6s ease-out both;
+}
+
+.anim-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
+
+/* ============================================
+   HOVER EFFECTS
+   ============================================ */
+
+.hover-lift {
+  transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+}
+
+.hover-zoom img {
+  transition: transform 0.7s ease;
+}
+
+.hover-zoom:hover img {
+  transform: scale(1.08);
+}
+
+/* ============================================
+   HERO SLIDER
+   ============================================ */
+
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1.2s ease-in-out;
+}
+
+.hero-slide.active {
+  opacity: 1;
+}
+
+.hero-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: zoomSlow 6s ease-out both;
+}
+
+/* ============================================
+   MARQUEE TEXT
+   ============================================ */
+
+.marquee-wrapper {
+  display: flex;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.marquee-content {
+  display: flex;
+  animation: marquee 30s linear infinite;
+}
+
+/* Hide zoom on mobile for performance */
+@media (max-width: 768px) {
+  .anim-zoom {
+    animation: none;
+  }
+}
+/* ============================================
+   FLOATING RING LOGOS - LOOKBOOK SECTION
+   ============================================ */
+
+@keyframes ring-fade-cycle {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) rotate(-5deg);
+  }
+  50% {
+    opacity: 0.08;
+    transform: scale(1) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.1) rotate(5deg);
+  }
+}
+
+@keyframes ring-fade-cycle-alt {
+  0% {
+    opacity: 0;
+    transform: scale(1.1) rotate(5deg);
+  }
+  50% {
+    opacity: 0.06;
+    transform: scale(1) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9) rotate(-5deg);
+  }
+}
+
+.floating-ring {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  filter: grayscale(100%);
+}
+
+.ring-anim-1 {
+  animation: ring-fade-cycle 2s ease-in-out infinite;
+}
+
+.ring-anim-2 {
+  animation: ring-fade-cycle-alt 2s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+
+.ring-anim-3 {
+  animation: ring-fade-cycle 2s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.ring-anim-4 {
+  animation: ring-fade-cycle-alt 2s ease-in-out infinite;
+  animation-delay: 1.5s;
+}
+
+/* Hide on mobile for performance */
+@media (max-width: 768px) {
+  .floating-ring {
+    display: none;
+  }
 }
