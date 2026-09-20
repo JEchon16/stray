@@ -30,12 +30,15 @@ export default function EditProductPage() {
   // Image state — existing URLs
   const [existingFrontUrl, setExistingFrontUrl] = useState('')
   const [existingBackUrl, setExistingBackUrl] = useState('')
+  const [existingChartUrl, setExistingChartUrl] = useState('')
 
   // Image state — new uploads
   const [imageFront, setImageFront] = useState<File | null>(null)
   const [imageBack, setImageBack] = useState<File | null>(null)
+  const [imageChart, setImageChart] = useState<File | null>(null)
   const [imageFrontPreview, setImageFrontPreview] = useState('')
   const [imageBackPreview, setImageBackPreview] = useState('')
+  const [imageChartPreview, setImageChartPreview] = useState('')
 
   // Load product data
   useEffect(() => {
@@ -58,10 +61,10 @@ export default function EditProductPage() {
       setSoldOut(product.sold_out)
       setExistingFrontUrl(product.image_front)
       setExistingBackUrl(product.image_back || '')
+      setExistingChartUrl(product.image_chart || '')
       setImageFrontPreview(product.image_front)
-      if (product.image_back) {
-        setImageBackPreview(product.image_back)
-      }
+      if (product.image_back) setImageBackPreview(product.image_back)
+      if (product.image_chart) setImageChartPreview(product.image_chart)
       setInitialLoading(false)
     }
 
@@ -98,6 +101,14 @@ export default function EditProductPage() {
     }
   }
 
+  function handleImageChartChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (file) {
+      setImageChart(file)
+      setImageChartPreview(URL.createObjectURL(file))
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -107,7 +118,10 @@ export default function EditProductPage() {
       // Upload new front image (if changed)
       let frontUrl = existingFrontUrl
       if (imageFront) {
-        const frontUpload = await uploadProductImage(imageFront, `${slug}-front`)
+        const frontUpload = await uploadProductImage(
+          imageFront,
+          `${slug}-front`
+        )
         if (frontUpload.error || !frontUpload.url) {
           setError(`Front image upload failed: ${frontUpload.error}`)
           setLoading(false)
@@ -128,7 +142,22 @@ export default function EditProductPage() {
         backUrl = backUpload.url
       }
 
-      // Update product
+      // Upload new chart image (if changed)
+      let chartUrl = existingChartUrl || null
+      if (imageChart) {
+        const chartUpload = await uploadProductImage(
+          imageChart,
+          `${slug}-chart`
+        )
+        if (chartUpload.error || !chartUpload.url) {
+          setError(`Size chart upload failed: ${chartUpload.error}`)
+          setLoading(false)
+          return
+        }
+        chartUrl = chartUpload.url
+      }
+
+      // ✅ UPDATE PRODUCT (hindi createProduct!)
       const result = await updateProduct(id, {
         name,
         slug,
@@ -136,6 +165,7 @@ export default function EditProductPage() {
         price: parseFloat(price),
         image_front: frontUrl,
         image_back: backUrl,
+        image_chart: chartUrl,
         badge: badge || null,
         category,
         sold_out: soldOut,
@@ -176,7 +206,8 @@ export default function EditProductPage() {
         <div className="animate-pulse space-y-8">
           <div className="h-4 bg-neutral-900 w-32" />
           <div className="h-12 bg-neutral-900 w-64" />
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-3 gap-6">
+            <div className="aspect-square bg-neutral-900" />
             <div className="aspect-square bg-neutral-900" />
             <div className="aspect-square bg-neutral-900" />
           </div>
@@ -232,7 +263,7 @@ export default function EditProductPage() {
           <h2 className="text-[10px] font-bold text-neutral-500 uppercase tracking-[0.3em] mb-5">
             Images
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Front Image */}
             <div>
               <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-[0.2em] mb-3">
@@ -286,6 +317,37 @@ export default function EditProductPage() {
                   type="file"
                   accept="image/*"
                   onChange={handleImageBackChange}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
+              </div>
+            </div>
+
+            {/* Size Chart */}
+            <div>
+              <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-[0.2em] mb-3">
+                Size Chart <span className="text-neutral-600">(optional)</span>
+              </label>
+              <div className="aspect-square bg-neutral-950 border border-neutral-900 overflow-hidden relative group cursor-pointer">
+                {imageChartPreview ? (
+                  <img
+                    src={imageChartPreview}
+                    alt="Chart preview"
+                    className="w-full h-full object-contain p-4"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-neutral-700 mb-3">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                      <circle cx="9" cy="9" r="2" />
+                      <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                    </svg>
+                    <p className="text-xs text-neutral-600">Click to upload</p>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChartChange}
                   className="absolute inset-0 opacity-0 cursor-pointer"
                 />
               </div>

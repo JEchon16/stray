@@ -92,17 +92,18 @@ export default function NewProductPage() {
       }
 
       // Create product
-      const result = await createProduct({
-        name,
-        slug,
-        description,
-        price: parseFloat(price),
-        image_front: frontUpload.url,
-        image_back: backUrl,
-        badge: badge || null,
-        category,
-        sold_out: soldOut,
-      })
+                const result = await createProduct({
+            name,
+            slug,
+            description,
+            price: parseFloat(price),
+            image_front: frontUpload.url,
+            image_back: backUrl,
+            image_chart: null,   // ← IDAGDAG MO 'TO
+            badge: badge || null,
+            category,
+            sold_out: soldOut,
+            })
 
       if (result.error) {
         setError(result.error)
