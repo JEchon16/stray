@@ -11,6 +11,7 @@ export interface Product {
   price: number
   image_front: string
   image_back: string | null
+  image_chart: string | null   // ← IDAGDAG MO 'TO
   badge: string | null
   category: string
   sold_out: boolean
