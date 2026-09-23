@@ -161,13 +161,13 @@ export default function ProductDetailPage() {
             Back
           </button>
 
+             {/* Center: Logo */}
           <Link href="/" className="absolute left-1/2 -translate-x-1/2">
-            <span
-              className="text-2xl font-black tracking-tight text-black"
-              style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
-            >
-              NostalManila
-            </span>
+            <img
+              src="/images/nostal-manila-logo.jpg"
+              alt="Nostal Manila"
+              className="h-8 w-auto object-contain"
+            />
           </Link>
 
           <button

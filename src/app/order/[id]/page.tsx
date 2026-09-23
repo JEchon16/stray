@@ -47,13 +47,13 @@ export default async function OrderConfirmationPage({
       {/* NAVBAR */}
       <nav className="border-b border-neutral-100">
         <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-center">
-          <Link href="/">
-            <span
-              className="text-2xl font-black tracking-tight"
-              style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
-            >
-              NostalManila
-            </span>
+             {/* Center: Logo */}
+          <Link href="/" className="absolute left-1/2 -translate-x-1/2">
+            <img
+              src="/images/nostal-manila-logo.jpg"
+              alt="Nostal Manila"
+              className="h-8 w-auto object-contain"
+            />
           </Link>
         </div>
       </nav>
