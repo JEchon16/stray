@@ -1,13 +1,16 @@
 // src/app/login/page.tsx
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 
-export default function LoginPage() {
+// ============================================
+// LOGIN FORM (wrapped in Suspense)
+// ============================================
+function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirect') || '/shop'
@@ -42,7 +45,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-white text-black">
       {/* NAVBAR */}
       <nav className="border-b border-neutral-100">
-        <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between relative">
           <Link
             href="/"
             className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] hover:text-neutral-500 transition-colors"
@@ -132,5 +135,24 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+// ============================================
+// MAIN PAGE (with Suspense wrapper)
+// ============================================
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <div className="animate-pulse">
+            <div className="w-12 h-12 border-2 border-black border-t-transparent rounded-full animate-spin" />
+          </div>
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   )
 }
