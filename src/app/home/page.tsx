@@ -13,7 +13,7 @@ import {
   X,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
-import type { Product } from '@/lib/types'
+import type { Product, HeroMedia, Collection, LookbookItem } from '@/lib/types'
 
 // ============================================
 // CUSTOM BRAND ICONS
@@ -32,50 +32,6 @@ const FacebookIcon = ({ size = 16 }: { size?: number }) => (
   </svg>
 )
 
-const TikTokIcon = ({ size = 16 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z" />
-  </svg>
-)
-
-// ============================================
-// ANIMATED WORD (wave hover effect)
-// ============================================
-function AnimatedWord({
-  text,
-  className = '',
-}: {
-  text: string
-  className?: string
-}) {
-  const [hovered, setHovered] = useState(false)
-
-  return (
-    <span
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onTouchStart={() => setHovered(true)}
-      onTouchEnd={() => setHovered(false)}
-      className={`inline-block cursor-default ${className}`}
-    >
-      {text.split('').map((char, i) => (
-        <span
-          key={i}
-          className="inline-block transition-all duration-300"
-          style={{
-            transform: hovered
-              ? `translateY(-10px) scale(1.15) rotate(${i % 2 === 0 ? -5 : 5}deg)`
-              : 'translateY(0) scale(1) rotate(0deg)',
-            transitionDelay: `${i * 40}ms`,
-          }}
-        >
-          {char === ' ' ? '\u00A0' : char}
-        </span>
-      ))}
-    </span>
-  )
-}
-
 // ============================================
 // HOME PAGE
 // ============================================
@@ -86,75 +42,110 @@ export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isPlaying, setIsPlaying] = useState(true)
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
+  const [heroMedia, setHeroMedia] = useState<HeroMedia[]>([])
+  const [collections, setCollections] = useState<Collection[]>([])
+  const [lookbook, setLookbook] = useState<LookbookItem[]>([])
   const [loading, setLoading] = useState(true)
 
   // ============================================
-  // HERO SLIDES (hardcoded muna)
-  // ============================================
- const heroSlides = [
-  { image: '/images/hero1.jpg', title: 'Nostal Manila', subtitle: 'Est. 2026' },
-  { image: '/images/hero2.jpg', title: 'Collection 01', subtitle: 'The Beginning' },
-  { image: '/images/hero3.jpg', title: 'From the Streets', subtitle: 'To the World' },
-  { image: '/images/hero4.jpg', title: 'Built for Dreamers', subtitle: 'Not Crowds' },
-]
-
-  // ============================================
-  // AUTO-PLAY SLIDER
+  // FETCH LAHAT NG DATA
   // ============================================
   useEffect(() => {
-    if (!isPlaying) return
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
-    }, 5000)
-    return () => clearInterval(interval)
-  }, [isPlaying, heroSlides.length])
-
-  // ============================================
-  // FETCH FEATURED PRODUCTS (read-only)
-  // ============================================
-  useEffect(() => {
-    async function fetchProducts() {
+    async function fetchData() {
       setLoading(true)
-      const { data } = await supabase
+
+      // Fetch hero media
+      const { data: heroData } = await supabase
+        .from('hero_media')
+        .select('*')
+        .eq('active', true)
+        .order('sort_order', { ascending: true })
+
+      if (heroData && heroData.length > 0) {
+        setHeroMedia(heroData as HeroMedia[])
+      } else {
+        // Fallback sa hardcoded
+        setHeroMedia([
+          { id: 'fallback-1', type: 'image', url: '/images/hero1.jpg', alt_text: null, sort_order: 1, active: true, created_at: '' },
+          { id: 'fallback-2', type: 'image', url: '/images/hero2.jpg', alt_text: null, sort_order: 2, active: true, created_at: '' },
+          { id: 'fallback-3', type: 'image', url: '/images/hero3.jpg', alt_text: null, sort_order: 3, active: true, created_at: '' },
+          { id: 'fallback-4', type: 'image', url: '/images/hero4.jpg', alt_text: null, sort_order: 4, active: true, created_at: '' },
+        ] as HeroMedia[])
+      }
+
+      // Fetch products
+      const { data: productData } = await supabase
         .from('products')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(4)
 
-      if (data) setFeaturedProducts(data as Product[])
+      if (productData) setFeaturedProducts(productData as Product[])
+
+      // Fetch collections
+      const { data: collectionsData } = await supabase
+        .from('collections')
+        .select('*')
+        .eq('active', true)
+        .order('sort_order', { ascending: true })
+
+      if (collectionsData && collectionsData.length > 0) {
+        setCollections(collectionsData as Collection[])
+      } else {
+        // Fallback
+        setCollections([
+          { id: 'fallback-1', name: '2026 Collection', status: 'Coming Soon', image_url: '/images/hero3.jpg', link: '/shop', sort_order: 1, active: true, created_at: '' },
+          { id: 'fallback-2', name: 'Nostal Manila', status: 'Available', image_url: '/images/products/black-tee-front.jpg', link: '/shop', sort_order: 2, active: true, created_at: '' },
+          { id: 'fallback-3', name: 'Peso Dreams', status: 'Available', image_url: '/images/hero1.jpg', link: '/shop', sort_order: 3, active: true, created_at: '' },
+        ] as Collection[])
+      }
+
+      // Fetch lookbook
+      const { data: lookbookData } = await supabase
+        .from('lookbook')
+        .select('*')
+        .eq('active', true)
+        .order('sort_order', { ascending: true })
+
+      if (lookbookData && lookbookData.length > 0) {
+        setLookbook(lookbookData as LookbookItem[])
+      } else {
+        // Fallback
+        setLookbook([
+          { id: 'fallback-1', title: 'Street Nights', image_url: '/images/lookbook-1.jpg', sort_order: 1, active: true, created_at: '' },
+          { id: 'fallback-2', title: 'The Crew', image_url: '/images/lookbook-2.jpg', sort_order: 2, active: true, created_at: '' },
+        ] as LookbookItem[])
+      }
+
       setLoading(false)
     }
 
-    fetchProducts()
+    fetchData()
   }, [])
+
+  // ============================================
+  // AUTO-PLAY SLIDER
+  // ============================================
+  useEffect(() => {
+    if (!isPlaying || heroMedia.length === 0) return
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroMedia.length)
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [isPlaying, heroMedia.length])
 
   const goToSlide = (index: number) => setCurrentSlide(index)
   const nextSlide = () =>
-    setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
+    setCurrentSlide((prev) => (prev + 1) % heroMedia.length)
   const prevSlide = () =>
-    setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)
+    setCurrentSlide(
+      (prev) => (prev - 1 + heroMedia.length) % heroMedia.length
+    )
   const togglePlay = () => setIsPlaying(!isPlaying)
 
   function formatPrice(price: number) {
     return '₱' + Number(price).toLocaleString('en-PH')
   }
-
-  // ============================================
-  // COLLECTIONS (hardcoded)
-  // ============================================
-  const collections = [
-    { name: '2026 Collection', status: 'Coming Soon', image: '/images/hero3.jpg' },
-    { name: 'Nostal Manila', status: 'Available', image: '/images/products/black-tee-front.jpg' },
-    { name: 'Peso Dreams', status: 'Available', image: '/images/hero1.jpg' },
-  ]
-
-  // ============================================
-  // LOOKBOOK (hardcoded)
-  // ============================================
-  const lookbook = [
-    { image: '/images/lookbook-1.jpg', title: 'Street Nights' },
-    { image: '/images/lookbook-2.jpg', title: 'The Crew' },
-  ]
 
   return (
     <div className="min-h-screen bg-white text-black">
@@ -184,30 +175,26 @@ export default function HomePage() {
         </div>
       </div>
 
-          {/* ============================================ */}
-           {/* ============================================ */}
-      {/* NAVBAR (STICKY) */}
+      {/* ============================================ */}
+      {/* NAVBAR */}
       {/* ============================================ */}
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-neutral-100">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="flex items-center justify-between h-20">
             {/* LEFT: Logo + Nav Links */}
             <div className="flex items-center gap-10 lg:gap-14">
-              {/* Logo */}
               <Link href="/" className="flex-shrink-0">
-                <span
-                  className="text-xl lg:text-2xl font-black tracking-tight text-black whitespace-nowrap"
-                  style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
-                >
-                  Nostal Manila
-                </span>
+                <img
+                  src="/images/nostal-manila-logo.jpg"
+                  alt="Nostal Manila"
+                  className="h-8 w-auto object-contain"
+                />
               </Link>
 
-              {/* Desktop Nav Links */}
               <div className="hidden lg:flex items-center gap-8">
                 <Link
                   href="/"
-                  className="text-[11px] font-bold uppercase tracking-[0.15em] text-black hover:text-neutral-400 transition-colors"
+                  className="text-[11px] font-bold uppercase tracking-[0.15em] text-black border-b border-black pb-0.5"
                 >
                   Home
                 </Link>
@@ -291,55 +278,33 @@ export default function HomePage() {
       {/* ============================================ */}
       {/* HERO SLIDER */}
       {/* ============================================ */}
-      <section className="relative h-[85vh] min-h-[600px] overflow-hidden bg-black">
-        {heroSlides.map((slide, i) => (
+      <section className="relative h-[75vh] min-h-[500px] overflow-hidden bg-black">
+        {heroMedia.map((media, i) => (
           <div
-            key={i}
+            key={media.id}
             className={`hero-slide ${i === currentSlide ? 'active' : ''}`}
           >
-            <img
-              src={slide.image}
-              alt={slide.title}
-              className="w-full h-full object-cover"
-            />
+            {media.type === 'video' ? (
+              <video
+                src={media.url}
+                className="w-full h-full object-cover"
+                autoPlay
+                loop
+                muted
+                playsInline
+              />
+            ) : (
+              <img
+                src={media.url}
+                alt={media.alt_text || 'Hero'}
+                className="w-full h-full object-cover"
+              />
+            )}
           </div>
         ))}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
-
-        <div className="absolute inset-0 flex items-end pb-24 px-6 sm:px-12 z-10">
-          <div className="max-w-7xl mx-auto w-full">
-            <div key={currentSlide} className="max-w-3xl anim-fade-up">
-              <p className="text-[10px] font-bold text-white/60 uppercase tracking-[0.4em] mb-4">
-                New Collection 2026
-              </p>
-              <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black leading-[0.9] tracking-tight mb-2 text-white">
-                <AnimatedWord text={heroSlides[currentSlide].title} />
-              </h1>
-              <h2
-                className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl leading-[0.9] tracking-tight mb-8 text-white"
-                style={{
-                  fontFamily: 'Georgia, serif',
-                  fontStyle: 'italic',
-                  fontWeight: 400,
-                }}
-              >
-                <AnimatedWord text={heroSlides[currentSlide].subtitle} />.
-              </h2>
-
-              <Link
-                href="/shop"
-                className="group inline-flex items-center gap-3 bg-white text-black px-8 py-4 font-bold text-xs uppercase tracking-[0.2em] hover:bg-neutral-200 transition-all"
-              >
-                Shop Collection
-                <ArrowRight
-                  size={16}
-                  className="group-hover:translate-x-1 transition-transform"
-                />
-              </Link>
-            </div>
-          </div>
-        </div>
+        {/* Subtle gradient overlay */}
+        <div className="absolute inset-0 bg-black/20 pointer-events-none" />
 
         {/* Slider controls */}
         <div className="absolute bottom-6 left-0 right-0 z-20">
@@ -353,7 +318,7 @@ export default function HomePage() {
             </button>
 
             <div className="flex items-center gap-2">
-              {heroSlides.map((_, i) => (
+              {heroMedia.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => goToSlide(i)}
@@ -387,7 +352,7 @@ export default function HomePage() {
 
             <div className="ml-2 text-xs font-bold text-white/60 tabular-nums hidden sm:block">
               {String(currentSlide + 1).padStart(2, '0')} /{' '}
-              {String(heroSlides.length).padStart(2, '0')}
+              {String(heroMedia.length).padStart(2, '0')}
             </div>
           </div>
         </div>
@@ -505,18 +470,24 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-            {collections.map((collection, i) => (
+            {collections.map((collection) => (
               <Link
-                key={i}
-                href="/shop"
-                className="group relative aspect-[3/4] overflow-hidden cursor-pointer"
+                key={collection.id}
+                href={collection.link || '/shop'}
+                className="group relative overflow-hidden cursor-pointer block"
               >
-                <img
-                  src={collection.image}
-                  alt={collection.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+                <div className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-200">
+                  <img
+                    src={collection.image_url}
+                    alt=""
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none'
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+                </div>
+
                 <div className="absolute bottom-0 left-0 right-0 p-6">
                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/70 mb-2">
                     {collection.status}
@@ -551,13 +522,13 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            {lookbook.map((item, i) => (
+            {lookbook.map((item) => (
               <div
-                key={i}
+                key={item.id}
                 className="group relative aspect-[4/3] overflow-hidden cursor-pointer"
               >
                 <img
-                  src={item.image}
+                  src={item.image_url}
                   alt={item.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
@@ -663,25 +634,22 @@ export default function HomePage() {
               </p>
               <div className="flex items-center gap-3">
                 <a
-                  href="#"
+                  href="https://www.instagram.com/nostalmanila/"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="p-2 border border-neutral-200 hover:bg-black hover:text-white transition-all"
                   aria-label="Instagram"
                 >
                   <InstagramIcon size={16} />
                 </a>
                 <a
-                  href="#"
+                  href="https://www.facebook.com/NostalManila"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="p-2 border border-neutral-200 hover:bg-black hover:text-white transition-all"
                   aria-label="Facebook"
                 >
                   <FacebookIcon size={16} />
-                </a>
-                <a
-                  href="#"
-                  className="p-2 border border-neutral-200 hover:bg-black hover:text-white transition-all"
-                  aria-label="TikTok"
-                >
-                  <TikTokIcon size={16} />
                 </a>
               </div>
             </div>
@@ -735,9 +703,9 @@ export default function HomePage() {
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-black transition-colors">
+                  <Link href="/contact" className="hover:text-black transition-colors">
                     Contact
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>

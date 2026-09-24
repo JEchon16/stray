@@ -18,6 +18,7 @@ import {
 import { createClient } from '@/lib/supabase'
 import { useCart } from '@/lib/cart-context'
 import SizeChartModal from '@/components/size-chart-modal'
+import AuthPromptModal from '@/components/auth-prompt-modal'
 import type { Product } from '@/lib/types'
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
@@ -36,6 +37,8 @@ export default function ProductDetailPage() {
     cartSubtotal,
   } = useCart()
 
+  const supabase = createClient()
+
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
@@ -48,9 +51,30 @@ export default function ProductDetailPage() {
   const [sizeChartOpen, setSizeChartOpen] = useState(false)
   const [added, setAdded] = useState(false)
 
-  const supabase = createClient()
+  // Auth state
+  const [userId, setUserId] = useState<string | null>(null)
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false)
 
-  // Fetch product from DB
+  // ============================================
+  // CHECK AUTH
+  // ============================================
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUserId(user?.id || null)
+    })
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserId(session?.user?.id || null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  // ============================================
+  // FETCH PRODUCT
+  // ============================================
   useEffect(() => {
     async function fetchProduct() {
       setLoading(true)
@@ -112,6 +136,21 @@ export default function ProductDetailPage() {
     setCartOpen(true)
   }
 
+  // ============================================
+  // CHECKOUT HANDLER (with auth check)
+  // ============================================
+  function handleCheckout() {
+    setCartOpen(false)
+
+    if (userId) {
+      // Naka-login → dere-derecho sa checkout
+      window.location.href = '/checkout'
+    } else {
+      // Hindi naka-login → show modal
+      setShowAuthPrompt(true)
+    }
+  }
+
   function formatPrice(price: number) {
     return '₱' + price.toLocaleString('en-PH')
   }
@@ -148,9 +187,7 @@ export default function ProductDetailPage() {
   // ============================================
   return (
     <div className="min-h-screen bg-white text-black">
-      {/* ============================================ */}
       {/* NAVBAR */}
-      {/* ============================================ */}
       <nav className="sticky top-0 z-50 bg-white border-b border-neutral-100">
         <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
           <button
@@ -161,7 +198,6 @@ export default function ProductDetailPage() {
             Back
           </button>
 
-             {/* Center: Logo */}
           <Link href="/" className="absolute left-1/2 -translate-x-1/2">
             <img
               src="/images/nostal-manila-logo.jpg"
@@ -184,18 +220,13 @@ export default function ProductDetailPage() {
         </div>
       </nav>
 
-      {/* ============================================ */}
       {/* MAIN CONTENT */}
-      {/* ============================================ */}
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-          {/* ============================================ */}
           {/* LEFT: IMAGE GALLERY */}
-          {/* ============================================ */}
           <div>
             {/* Main Image */}
             <div className="relative aspect-square overflow-hidden group">
-              {/* Badge */}
               {product.badge && !product.sold_out && (
                 <div className="absolute top-4 left-4 bg-black text-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] z-10">
                   {product.badge}
@@ -207,7 +238,6 @@ export default function ProductDetailPage() {
                 </div>
               )}
 
-              {/* Current Image */}
               <button
                 onClick={() => setImageModalOpen(true)}
                 className="w-full h-full cursor-zoom-in"
@@ -219,12 +249,10 @@ export default function ProductDetailPage() {
                 />
               </button>
 
-              {/* Zoom Hint */}
               <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm border border-neutral-200 p-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                 <ZoomIn size={14} className="text-neutral-600" />
               </div>
 
-              {/* Left Arrow */}
               {images.length > 1 && (
                 <button
                   onClick={prevImage}
@@ -235,7 +263,6 @@ export default function ProductDetailPage() {
                 </button>
               )}
 
-              {/* Right Arrow */}
               {images.length > 1 && (
                 <button
                   onClick={nextImage}
@@ -271,21 +298,16 @@ export default function ProductDetailPage() {
             )}
           </div>
 
-          {/* ============================================ */}
           {/* RIGHT: PRODUCT INFO */}
-          {/* ============================================ */}
           <div className="lg:py-4">
-            {/* Title */}
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight mb-3">
               {product.name}
             </h1>
 
-            {/* Price */}
             <p className="text-2xl font-bold mb-6">
               {formatPrice(product.price)}
             </p>
 
-            {/* Description */}
             {product.description && (
               <p className="text-sm text-neutral-600 leading-relaxed mb-8">
                 {product.description}
@@ -384,9 +406,7 @@ export default function ProductDetailPage() {
         </div>
       </div>
 
-      {/* ============================================ */}
       {/* IMAGE MODAL (fullscreen) */}
-      {/* ============================================ */}
       {imageModalOpen && (
         <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center">
           <button
@@ -396,7 +416,6 @@ export default function ProductDetailPage() {
             <X size={24} />
           </button>
 
-          {/* Navigation */}
           {images.length > 1 && (
             <>
               <button
@@ -420,25 +439,20 @@ export default function ProductDetailPage() {
             className="max-w-full max-h-full object-contain p-12"
           />
 
-          {/* Image indicator */}
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white text-xs font-bold uppercase tracking-[0.2em]">
             {currentImage + 1} / {images.length} — {images[currentImage]?.label}
           </div>
         </div>
       )}
 
-      {/* ============================================ */}
       {/* SIZE CHART MODAL */}
-      {/* ============================================ */}
       <SizeChartModal
         isOpen={sizeChartOpen}
         onClose={() => setSizeChartOpen(false)}
         chartImage={chartSrc}
       />
 
-      {/* ============================================ */}
       {/* CART SIDEBAR */}
-      {/* ============================================ */}
       {cartOpen && (
         <div className="fixed inset-0 z-[100]">
           <div
@@ -446,7 +460,6 @@ export default function ProductDetailPage() {
             onClick={() => setCartOpen(false)}
           />
           <div className="absolute top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl flex flex-col">
-            {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-200">
               <h2 className="text-sm font-black uppercase tracking-[0.2em]">
                 Cart
@@ -459,7 +472,6 @@ export default function ProductDetailPage() {
               </button>
             </div>
 
-            {/* Items */}
             <div className="flex-1 overflow-y-auto">
               {cart.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full px-6 text-center">
@@ -545,7 +557,6 @@ export default function ProductDetailPage() {
               )}
             </div>
 
-            {/* Footer */}
             {cart.length > 0 && (
               <div className="border-t border-neutral-200 p-6 space-y-3">
                 <div className="flex justify-between text-xs">
@@ -570,17 +581,26 @@ export default function ProductDetailPage() {
                     {formatPrice(cartSubtotal)}
                   </span>
                 </div>
-                <Link
-                  href="/checkout"
-                  className="block w-full bg-black text-white py-4 text-center font-bold text-xs uppercase tracking-[0.15em] hover:bg-neutral-800 transition-all"
+
+                {/* Checkout Button — with auth check */}
+                <button
+                  onClick={handleCheckout}
+                  className="w-full bg-black text-white py-4 text-center font-bold text-xs uppercase tracking-[0.15em] hover:bg-neutral-800 transition-all"
                 >
                   Checkout
-                </Link>
+                </button>
               </div>
             )}
           </div>
         </div>
       )}
+
+      {/* AUTH PROMPT MODAL */}
+      <AuthPromptModal
+        isOpen={showAuthPrompt}
+        onClose={() => setShowAuthPrompt(false)}
+        redirectTo="/checkout"
+      />
     </div>
   )
 }

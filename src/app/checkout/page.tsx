@@ -1,7 +1,7 @@
 // src/app/checkout/page.tsx
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -16,7 +16,8 @@ import {
 } from 'lucide-react'
 import { useCart } from '@/lib/cart-context'
 import { createOrder } from '@/lib/orders'
-import { uploadProductImage } from '@/lib/upload'
+import { uploadGcashProof } from '@/lib/upload'
+import { createClient } from '@/lib/supabase'
 
 const GCASH_NUMBER = '0993-264-8558'
 const GCASH_NAME = 'Jeffmark Ganoza'
@@ -25,12 +26,24 @@ const SHIPPING_FEE = 500
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { cart, updateQuantity, removeFromCart, cartSubtotal, clearCart } = useCart()
+  const {
+    cart,
+    updateQuantity,
+    removeFromCart,
+    cartSubtotal,
+    clearCart,
+  } = useCart()
 
+  const supabase = createClient()
+
+  // Auth state
+  const [checkingAuth, setCheckingAuth] = useState(true)
+  const [userId, setUserId] = useState<string | null>(null)
+
+  // Form state
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // Form state
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -46,8 +59,40 @@ export default function CheckoutPage() {
   const [gcashProof, setGcashProof] = useState<File | null>(null)
   const [gcashProofPreview, setGcashProofPreview] = useState('')
 
-  // Shipping fee logic
-  const shippingFee = cartSubtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE
+  // ============================================
+  // CHECK AUTH
+  // ============================================
+  useEffect(() => {
+    async function checkAuth() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user) {
+        router.push('/login?redirect=/checkout')
+        return
+      }
+
+      setUserId(user.id)
+
+      // Auto-fill email
+      if (user.email) setEmail(user.email)
+
+      // Auto-fill name kung meron sa metadata
+      const fullNameMeta = user.user_metadata?.full_name
+      if (fullNameMeta) setFullName(fullNameMeta)
+
+      setCheckingAuth(false)
+    }
+
+    checkAuth()
+  }, [router, supabase])
+
+  // ============================================
+  // SHIPPING FEE LOGIC
+  // ============================================
+  const shippingFee =
+    cartSubtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE
   const total = cartSubtotal + shippingFee
 
   function formatPrice(price: number) {
@@ -62,11 +107,13 @@ export default function CheckoutPage() {
     }
   }
 
+  // ============================================
+  // SUBMIT ORDER
+  // ============================================
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
 
-    // Validation
     if (cart.length === 0) {
       setError('Walang laman ang cart mo.')
       return
@@ -79,7 +126,9 @@ export default function CheckoutPage() {
 
     if (paymentMethod === 'gcash') {
       if (!gcashReference || !gcashProof) {
-        setError('Please enter GCash reference number and upload proof of payment.')
+        setError(
+          'Please enter GCash reference number and upload proof of payment.'
+        )
         return
       }
     }
@@ -91,11 +140,11 @@ export default function CheckoutPage() {
 
       // Upload GCash proof if needed
       if (paymentMethod === 'gcash' && gcashProof) {
-        const uploadResult = await uploadProductImage(
+        const uploadResult = await uploadGcashProof(
           gcashProof,
           `gcash-proof-${Date.now()}`
         )
-        // ⚠️ Change bucket sa uploadProductImage — wait, i-check muna
+
         if (uploadResult.error || !uploadResult.url) {
           setError(`GCash proof upload failed: ${uploadResult.error}`)
           setLoading(false)
@@ -105,25 +154,26 @@ export default function CheckoutPage() {
       }
 
       // Create order
-      const result = await createOrder({
-        customer_name: fullName,
-        customer_email: email,
-        customer_phone: phone,
-        shipping_address: `${address}, ${city}, ${province}${postalCode ? ` ${postalCode}` : ''}`,
-        payment_method: paymentMethod,
-        gcash_reference: paymentMethod === 'gcash' ? gcashReference : null,
-        gcash_proof_url: gcashProofUrl,
-        notes: notes || null,
-        items: cart.map((item) => ({
-          product_id: item.id,
-          product_name: item.name,
-          product_price: item.price,
-          product_image: item.image,
-          size: item.size,
-          quantity: item.quantity,
-        })),
-        shipping_fee: shippingFee,
-      })
+     const result = await createOrder({
+  customer_name: fullName,
+  customer_email: email,
+  customer_phone: phone,
+  shipping_address: `...`,
+  payment_method: paymentMethod,
+  gcash_reference: paymentMethod === 'gcash' ? gcashReference : null,
+  gcash_proof_url: gcashProofUrl,
+  notes: notes || null,
+  items: cart.map((item) => ({
+    product_id: item.id,
+    product_name: item.name,
+    product_price: item.price,
+    product_image: item.image,
+    size: item.size,
+    quantity: item.quantity,
+  })),
+  shipping_fee: shippingFee,
+  customer_id: userId,   // ← ✅ DAPAT MERON NA 'TO
+})
 
       if (result.error) {
         setError(result.error)
@@ -142,7 +192,22 @@ export default function CheckoutPage() {
     }
   }
 
-  // Empty cart state
+  // ============================================
+  // LOADING STATE
+  // ============================================
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-pulse">
+          <div className="w-12 h-12 border-2 border-black border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    )
+  }
+
+  // ============================================
+  // EMPTY CART STATE
+  // ============================================
   if (cart.length === 0) {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6">
@@ -166,7 +231,7 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-white text-black">
       {/* NAVBAR */}
-      <nav className="sticky top-0 z-50 bg-white border-b border-neutral-100">
+      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-neutral-100">
         <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
           <Link
             href="/shop"
@@ -177,15 +242,14 @@ export default function CheckoutPage() {
           </Link>
 
           <Link href="/" className="absolute left-1/2 -translate-x-1/2">
-            <span
-              className="text-2xl font-black tracking-tight text-black"
-              style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
-            >
-              NostalManila
-            </span>
+            <img
+              src="/images/nostal-manila-logo.jpg"
+              alt="Nostal Manila"
+              className="h-8 w-auto object-contain"
+            />
           </Link>
 
-          <div className="w-20" />
+          <div className="w-24" />
         </div>
       </nav>
 
@@ -416,13 +480,15 @@ export default function CheckoutPage() {
                         Account Name: {GCASH_NAME}
                       </p>
                       <p className="text-xs text-neutral-600 mt-3">
-                        Amount to send: <strong>{formatPrice(total)}</strong>
+                        Amount to send:{' '}
+                        <strong>{formatPrice(total)}</strong>
                       </p>
                     </div>
 
                     <div>
                       <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-[0.2em] mb-3">
-                        GCash Reference Number <span className="text-red-500">*</span>
+                        GCash Reference Number{' '}
+                        <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -435,7 +501,8 @@ export default function CheckoutPage() {
 
                     <div>
                       <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-[0.2em] mb-3">
-                        Upload Proof of Payment <span className="text-red-500">*</span>
+                        Upload Proof of Payment{' '}
+                        <span className="text-red-500">*</span>
                       </label>
                       <div className="relative border-2 border-dashed border-neutral-300 hover:border-black transition-colors">
                         {gcashProofPreview ? (
@@ -458,7 +525,10 @@ export default function CheckoutPage() {
                           </div>
                         ) : (
                           <div className="flex flex-col items-center justify-center py-12">
-                            <Upload size={24} className="text-neutral-400 mb-3" />
+                            <Upload
+                              size={24}
+                              className="text-neutral-400 mb-3"
+                            />
                             <p className="text-xs font-bold uppercase tracking-[0.15em] text-neutral-600 mb-1">
                               Click to upload
                             </p>
@@ -492,10 +562,7 @@ export default function CheckoutPage() {
                 {/* Items */}
                 <div className="space-y-4 mb-6 max-h-64 overflow-y-auto">
                   {cart.map((item) => (
-                    <div
-                      key={`${item.id}-${item.size}`}
-                      className="flex gap-3"
-                    >
+                    <div key={`${item.id}-${item.size}`} className="flex gap-3">
                       <div className="w-16 h-16 bg-white border border-neutral-200 flex-shrink-0 overflow-hidden">
                         <img
                           src={item.image}
@@ -524,7 +591,9 @@ export default function CheckoutPage() {
                     <span className="text-neutral-500 uppercase tracking-[0.1em]">
                       Subtotal
                     </span>
-                    <span className="font-bold">{formatPrice(cartSubtotal)}</span>
+                    <span className="font-bold">
+                      {formatPrice(cartSubtotal)}
+                    </span>
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-neutral-500 uppercase tracking-[0.1em]">
@@ -562,8 +631,14 @@ export default function CheckoutPage() {
 
                 <p className="text-[10px] text-neutral-500 text-center mt-4 leading-relaxed">
                   Sa pag-place ng order, sumasang-ayon ka sa aming{' '}
-                  <a href="#" className="underline">Terms</a> at{' '}
-                  <a href="#" className="underline">Privacy Policy</a>.
+                  <a href="#" className="underline">
+                    Terms
+                  </a>{' '}
+                  at{' '}
+                  <a href="#" className="underline">
+                    Privacy Policy
+                  </a>
+                  .
                 </p>
               </div>
             </div>

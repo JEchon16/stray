@@ -33,8 +33,8 @@ export interface CheckoutData {
   notes?: string | null
   items: CheckoutItem[]
   shipping_fee: number
+  customer_id?: string | null   // ← IDAGDAG MO 'TO
 }
-
 // ============================================
 // GENERATE ORDER NUMBER (NM-2026-0001)
 // ============================================
@@ -73,27 +73,28 @@ export async function createOrder(data: CheckoutData) {
     const total = subtotal + data.shipping_fee
     const orderNumber = await generateOrderNumber()
 
-    const { data: order, error: orderError } = await supabaseAdmin
-      .from('orders')
-      .insert([
-        {
-          order_number: orderNumber,
-          customer_name: data.customer_name,
-          customer_email: data.customer_email,
-          customer_phone: data.customer_phone,
-          shipping_address: data.shipping_address,
-          payment_method: data.payment_method,
-          gcash_reference: data.gcash_reference || null,
-          gcash_proof_url: data.gcash_proof_url || null,
-          subtotal,
-          shipping_fee: data.shipping_fee,
-          total,
-          status: 'pending',
-          notes: data.notes || null,
-        },
-      ])
-      .select()
-      .single()
+  const { data: order, error: orderError } = await supabaseAdmin
+  .from('orders')
+  .insert([
+    {
+      order_number: orderNumber,
+      customer_name: data.customer_name,
+      customer_email: data.customer_email,
+      customer_phone: data.customer_phone,
+      shipping_address: data.shipping_address,
+      payment_method: data.payment_method,
+      gcash_reference: data.gcash_reference || null,
+      gcash_proof_url: data.gcash_proof_url || null,
+      subtotal,
+      shipping_fee: data.shipping_fee,
+      total,
+      status: 'pending',
+      notes: data.notes || null,
+      customer_id: data.customer_id || null,   // ← IDAGDAG MO 'TO
+    },
+  ])
+  .select()
+  .single()
 
     if (orderError || !order) {
       return { error: orderError?.message || 'Failed to create order' }

@@ -83,3 +83,42 @@ export interface OrderItem {
 // ============================================
 export const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'] as const
 export type Size = typeof SIZES[number]
+
+// ============================================
+// HERO MEDIA
+// ============================================
+export interface HeroMedia {
+  id: string
+  type: 'image' | 'video'
+  url: string
+  alt_text: string | null
+  sort_order: number
+  active: boolean
+  created_at: string
+}
+
+// ============================================
+// COLLECTION (DB version)
+// ============================================
+export interface Collection {
+  id: string
+  name: string
+  status: string
+  image_url: string
+  link: string | null
+  sort_order: number
+  active: boolean
+  created_at: string
+}
+
+// ============================================
+// LOOKBOOK (DB version)
+// ============================================
+export interface LookbookItem {
+  id: string
+  title: string
+  image_url: string
+  sort_order: number
+  active: boolean
+  created_at: string
+}

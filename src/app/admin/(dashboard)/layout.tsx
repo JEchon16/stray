@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
-import { Menu, X, LayoutDashboard, Package, ShoppingBag, Globe, LogOut } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Package, ShoppingBag, Globe, LogOut, Film } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 export default function AdminLayout({
@@ -52,10 +52,11 @@ export default function AdminLayout({
     router.refresh()
   }
 
-  const navItems = [
+    const navItems = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/admin/products', label: 'Products', icon: Package },
     { href: '/admin/orders', label: 'Orders', icon: ShoppingBag },
+    { href: '/admin/hero', label: 'Hero Media', icon: Film },   // ← IDAGDAG
   ]
 
   const isActive = (href: string) => {

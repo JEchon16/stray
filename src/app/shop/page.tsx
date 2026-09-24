@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import type { Product } from '@/lib/types'
+import AuthPromptModal from '@/components/auth-prompt-modal'
 
 // Cart Item Type
 interface CartItem {
@@ -27,6 +28,8 @@ interface CartItem {
 }
 
 export default function ShopPage() {
+  const supabase = createClient()
+
   const [cartOpen, setCartOpen] = useState(false)
   const [cart, setCart] = useState<CartItem[]>([])
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -38,7 +41,30 @@ export default function ShopPage() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
-  const supabase = createClient()
+  // Auth state
+  const [userId, setUserId] = useState<string | null>(null)
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false)
+
+    // ============================================
+  // CHECK AUTH
+  // ============================================
+  useEffect(() => {
+    // Get initial user
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUserId(user?.id || null)
+      console.log('Initial userId:', user?.id || null)  // debug
+    })
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserId(session?.user?.id || null)
+      console.log('Auth changed, userId:', session?.user?.id || null)  // debug
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
 
   // Fetch products from Supabase
   useEffect(() => {
@@ -154,6 +180,19 @@ export default function ShopPage() {
     return '₱' + price.toLocaleString('en-PH')
   }
 
+  // Checkout Handler
+  const handleCheckout = () => {
+    setCartOpen(false)
+
+    if (userId) {
+      // Naka-login → dere-derecho sa checkout
+      window.location.href = '/checkout'
+    } else {
+      // Hindi naka-login → show modal
+      setShowAuthPrompt(true)
+    }
+  }
+
   // Popular search tags
   const popularTags = ['Tees', 'New', 'Nostal Manila', 'Black', 'White']
 
@@ -223,7 +262,11 @@ export default function ShopPage() {
             </button>
 
             {/* User */}
-            <button className="p-2 hover:bg-neutral-100 rounded-full transition-colors">
+            <Link
+              href="/account"
+              className="p-2 hover:bg-neutral-100 rounded-full transition-colors"
+              aria-label="Account"
+            >
               <svg
                 width={18}
                 height={18}
@@ -237,7 +280,7 @@ export default function ShopPage() {
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
-            </button>
+            </Link>
 
             {/* Cart */}
             <button
@@ -259,7 +302,7 @@ export default function ShopPage() {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-neutral-100 bg-white px-6 py-4 space-y-1">
             <Link
-              href="home"
+              href="/"
               onClick={() => setMobileMenuOpen(false)}
               className="block px-4 py-3 text-neutral-600 hover:text-black hover:bg-neutral-100 rounded-lg font-bold uppercase tracking-wider text-xs transition-all"
             >
@@ -885,17 +928,28 @@ export default function ShopPage() {
                     {formatPrice(cartSubtotal)}
                   </span>
                 </div>
-                <Link
-                  href="/checkout"
-                  className="block w-full bg-black text-white py-4 text-center font-bold text-xs uppercase tracking-[0.15em] hover:bg-neutral-800 transition-all"
+
+                {/* Checkout Button — with auth check */}
+                <button
+                  onClick={handleCheckout}
+                  className="w-full bg-black text-white py-4 text-center font-bold text-xs uppercase tracking-[0.15em] hover:bg-neutral-800 transition-all"
                 >
                   Checkout
-                </Link>
+                </button>
               </div>
             )}
           </div>
         </div>
       )}
+
+      {/* ============================================ */}
+      {/* AUTH PROMPT MODAL */}
+      {/* ============================================ */}
+      <AuthPromptModal
+        isOpen={showAuthPrompt}
+        onClose={() => setShowAuthPrompt(false)}
+        redirectTo="/checkout"
+      />
     </div>
   )
 }
