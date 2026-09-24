@@ -302,7 +302,7 @@ export default function ShopPage() {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-neutral-100 bg-white px-6 py-4 space-y-1">
             <Link
-              href="/"
+              href="home"
               onClick={() => setMobileMenuOpen(false)}
               className="block px-4 py-3 text-neutral-600 hover:text-black hover:bg-neutral-100 rounded-lg font-bold uppercase tracking-wider text-xs transition-all"
             >
