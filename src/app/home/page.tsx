@@ -13,7 +13,7 @@ import {
   X,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
-import type { Product, HeroMedia, Collection, LookbookItem } from '@/lib/types'
+import type { Product, HeroMedia, Collection } from '@/lib/types'
 
 // ============================================
 // CUSTOM BRAND ICONS
@@ -44,17 +44,16 @@ export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
   const [heroMedia, setHeroMedia] = useState<HeroMedia[]>([])
   const [collections, setCollections] = useState<Collection[]>([])
-  const [lookbook, setLookbook] = useState<LookbookItem[]>([])
   const [loading, setLoading] = useState(true)
 
   // ============================================
-  // FETCH LAHAT NG DATA
+  // FETCH DATA
   // ============================================
   useEffect(() => {
     async function fetchData() {
       setLoading(true)
 
-      // Fetch hero media
+      // Hero media
       const { data: heroData } = await supabase
         .from('hero_media')
         .select('*')
@@ -64,16 +63,15 @@ export default function HomePage() {
       if (heroData && heroData.length > 0) {
         setHeroMedia(heroData as HeroMedia[])
       } else {
-        // Fallback sa hardcoded
         setHeroMedia([
-          { id: 'fallback-1', type: 'image', url: '/images/hero1.jpg', alt_text: null, sort_order: 1, active: true, created_at: '' },
-          { id: 'fallback-2', type: 'image', url: '/images/hero2.jpg', alt_text: null, sort_order: 2, active: true, created_at: '' },
-          { id: 'fallback-3', type: 'image', url: '/images/hero3.jpg', alt_text: null, sort_order: 3, active: true, created_at: '' },
-          { id: 'fallback-4', type: 'image', url: '/images/hero4.jpg', alt_text: null, sort_order: 4, active: true, created_at: '' },
+          { id: 'fb-1', type: 'image', url: '/images/hero1.jpg', alt_text: null, sort_order: 1, active: true, created_at: '' },
+          { id: 'fb-2', type: 'image', url: '/images/hero2.jpg', alt_text: null, sort_order: 2, active: true, created_at: '' },
+          { id: 'fb-3', type: 'image', url: '/images/hero3.jpg', alt_text: null, sort_order: 3, active: true, created_at: '' },
+          { id: 'fb-4', type: 'image', url: '/images/hero4.jpg', alt_text: null, sort_order: 4, active: true, created_at: '' },
         ] as HeroMedia[])
       }
 
-      // Fetch products
+      // Products
       const { data: productData } = await supabase
         .from('products')
         .select('*')
@@ -82,7 +80,7 @@ export default function HomePage() {
 
       if (productData) setFeaturedProducts(productData as Product[])
 
-      // Fetch collections
+      // Collections
       const { data: collectionsData } = await supabase
         .from('collections')
         .select('*')
@@ -92,29 +90,11 @@ export default function HomePage() {
       if (collectionsData && collectionsData.length > 0) {
         setCollections(collectionsData as Collection[])
       } else {
-        // Fallback
         setCollections([
-          { id: 'fallback-1', name: '2026 Collection', status: 'Coming Soon', image_url: '/images/hero3.jpg', link: '/shop', sort_order: 1, active: true, created_at: '' },
-          { id: 'fallback-2', name: 'Nostal Manila', status: 'Available', image_url: '/images/products/black-tee-front.jpg', link: '/shop', sort_order: 2, active: true, created_at: '' },
-          { id: 'fallback-3', name: 'Peso Dreams', status: 'Available', image_url: '/images/hero1.jpg', link: '/shop', sort_order: 3, active: true, created_at: '' },
+          { id: 'fb-1', name: '2026 Collection', status: 'Coming Soon', image_url: '/images/hero3.jpg', link: '/shop', sort_order: 1, active: true, created_at: '' },
+          { id: 'fb-2', name: 'Nostal Manila', status: 'Available', image_url: '/images/products/black-tee-front.jpg', link: '/shop', sort_order: 2, active: true, created_at: '' },
+          { id: 'fb-3', name: 'Peso Dreams', status: 'Available', image_url: '/images/hero1.jpg', link: '/shop', sort_order: 3, active: true, created_at: '' },
         ] as Collection[])
-      }
-
-      // Fetch lookbook
-      const { data: lookbookData } = await supabase
-        .from('lookbook')
-        .select('*')
-        .eq('active', true)
-        .order('sort_order', { ascending: true })
-
-      if (lookbookData && lookbookData.length > 0) {
-        setLookbook(lookbookData as LookbookItem[])
-      } else {
-        // Fallback
-        setLookbook([
-          { id: 'fallback-1', title: 'Street Nights', image_url: '/images/lookbook-1.jpg', sort_order: 1, active: true, created_at: '' },
-          { id: 'fallback-2', title: 'The Crew', image_url: '/images/lookbook-2.jpg', sort_order: 2, active: true, created_at: '' },
-        ] as LookbookItem[])
       }
 
       setLoading(false)
@@ -124,7 +104,7 @@ export default function HomePage() {
   }, [])
 
   // ============================================
-  // AUTO-PLAY SLIDER
+  // AUTO-PLAY
   // ============================================
   useEffect(() => {
     if (!isPlaying || heroMedia.length === 0) return
@@ -138,9 +118,7 @@ export default function HomePage() {
   const nextSlide = () =>
     setCurrentSlide((prev) => (prev + 1) % heroMedia.length)
   const prevSlide = () =>
-    setCurrentSlide(
-      (prev) => (prev - 1 + heroMedia.length) % heroMedia.length
-    )
+    setCurrentSlide((prev) => (prev - 1 + heroMedia.length) % heroMedia.length)
   const togglePlay = () => setIsPlaying(!isPlaying)
 
   function formatPrice(price: number) {
@@ -149,9 +127,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      {/* ============================================ */}
       {/* ANNOUNCEMENT BAR */}
-      {/* ============================================ */}
       <div className="bg-black text-white py-2 overflow-hidden">
         <div className="marquee-wrapper">
           <div className="marquee-content">
@@ -175,13 +151,10 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ============================================ */}
       {/* NAVBAR */}
-      {/* ============================================ */}
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-neutral-100">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="flex items-center justify-between h-20">
-            {/* LEFT: Logo + Nav Links */}
             <div className="flex items-center gap-10 lg:gap-14">
               <Link href="/" className="flex-shrink-0">
                 <img
@@ -219,7 +192,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* RIGHT: CTA + Mobile Menu */}
             <div className="flex items-center gap-4">
               <Link
                 href="/shop"
@@ -240,7 +212,6 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Mobile menu */}
         {mobileMenuOpen && (
           <div className="lg:hidden border-t border-neutral-100 bg-white px-6 py-4 space-y-1">
             <Link
@@ -275,9 +246,7 @@ export default function HomePage() {
         )}
       </nav>
 
-      {/* ============================================ */}
       {/* HERO SLIDER */}
-      {/* ============================================ */}
       <section className="relative h-[75vh] min-h-[500px] overflow-hidden bg-black">
         {heroMedia.map((media, i) => (
           <div
@@ -303,10 +272,8 @@ export default function HomePage() {
           </div>
         ))}
 
-        {/* Subtle gradient overlay */}
         <div className="absolute inset-0 bg-black/20 pointer-events-none" />
 
-        {/* Slider controls */}
         <div className="absolute bottom-6 left-0 right-0 z-20">
           <div className="max-w-7xl mx-auto px-6 flex items-center justify-center gap-4">
             <button
@@ -358,9 +325,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================ */}
       {/* FEATURED DROP */}
-      {/* ============================================ */}
       <section className="py-24 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-end justify-between mb-12">
@@ -455,9 +420,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================ */}
       {/* COLLECTIONS */}
-      {/* ============================================ */}
       <section id="collections" className="py-24 px-6 bg-neutral-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
@@ -505,52 +468,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================ */}
-      {/* LOOKBOOK */}
-      {/* ============================================ */}
-      <section id="lookbook" className="py-24 px-6 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-end justify-between mb-16">
-            <div>
-              <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-[0.3em] mb-3">
-                Lookbook
-              </p>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight">
-                Wear The Story
-              </h2>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            {lookbook.map((item) => (
-              <div
-                key={item.id}
-                className="group relative aspect-[4/3] overflow-hidden cursor-pointer"
-              >
-                <img
-                  src={item.image_url}
-                  alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute bottom-0 left-0 right-0 p-8 translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/70 mb-2">
-                    Lookbook 2026
-                  </p>
-                  <h3 className="text-2xl sm:text-3xl font-black text-white">
-                    {item.title}
-                  </h3>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================ */}
       {/* BRAND STORY */}
-      {/* ============================================ */}
-      <section id="about" className="py-32 px-6 bg-neutral-50">
+      <section id="about" className="py-32 px-6 bg-white">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-[0.3em] mb-6">
             The Story
@@ -584,10 +503,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================ */}
       {/* NEWSLETTER */}
-      {/* ============================================ */}
-      <section className="py-24 px-6 bg-white border-t border-neutral-100">
+      <section className="py-24 px-6 bg-neutral-50 border-t border-neutral-100">
         <div className="max-w-2xl mx-auto text-center">
           <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-[0.3em] mb-4">
             Newsletter
@@ -615,9 +532,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================ */}
       {/* FOOTER */}
-      {/* ============================================ */}
       <footer className="py-16 px-6 bg-white border-t border-neutral-100">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">

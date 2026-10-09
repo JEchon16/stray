@@ -18,7 +18,7 @@ export default function AdminLoginPage() {
     setLoading(true)
 
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
@@ -29,6 +29,18 @@ export default function AdminLoginPage() {
       return
     }
 
+    // Check if admin (via app_metadata.role)
+    const isAdmin = data.user?.app_metadata?.role === 'admin'
+
+    if (!isAdmin) {
+      // Customer account — sign out agad
+      await supabase.auth.signOut()
+      setError('Hindi ka authorized na mag-access ng admin panel.')
+      setLoading(false)
+      return
+    }
+
+    // Admin — proceed sa dashboard
     router.push('/admin')
     router.refresh()
   }

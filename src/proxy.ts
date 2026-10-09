@@ -1,4 +1,4 @@
-// src/middleware.ts
+// src/proxy.ts
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
@@ -30,23 +30,42 @@ export async function proxy(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  // Protect /admin routes (except /admin/login)
-  if (
-    request.nextUrl.pathname.startsWith('/admin') &&
-    request.nextUrl.pathname !== '/admin/login' &&
-    !user
-  ) {
-    return NextResponse.redirect(new URL('/admin/login', request.url))
-  }
+  const pathname = request.nextUrl.pathname
+  const isAdminRoute = pathname.startsWith('/admin')
+  const isAdminLogin = pathname === '/admin/login'
 
-  // If logged in and visiting /admin/login, redirect to dashboard
-  if (
-    request.nextUrl.pathname === '/admin/login' &&
-    user
-  ) {
-    return NextResponse.redirect(new URL('/admin', request.url))
+  // Check kung admin yung user (via app_metadata.role)
+  const isAdmin = user?.app_metadata?.role === 'admin'
+
+  // ============================================
+  // ADMIN ROUTES PROTECTION
+  // ============================================
+  if (isAdminRoute) {
+    // Kung nasa /admin/login:
+    if (isAdminLogin) {
+      // Kung naka-login as admin, redirect sa dashboard
+      if (user && isAdmin) {
+        return NextResponse.redirect(new URL('/admin', request.url))
+      }
+      // Kung customer (hindi admin), allow lang — pero i-sign out sa page
+      // Kung walang user, allow
+      return response
+    }
+
+    // Kung ibang /admin/* routes:
+    // 1. Walang session — redirect sa login
+    if (!user) {
+      return NextResponse.redirect(new URL('/admin/login', request.url))
+    }
+
+    // 2. Naka-login pero HINDI ADMIN — redirect sa home
+    if (!isAdmin) {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
   }
 
   return response

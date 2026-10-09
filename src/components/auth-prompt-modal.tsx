@@ -55,15 +55,20 @@ export default function AuthPromptModal({
             </svg>
           </div>
 
+          {/* Label */}
           <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.3em] mb-3">
             Account Required
           </p>
-          <h2 className="text-2xl font-black tracking-tight mb-3">
-            May account ka na ba?
+
+          {/* Title */}
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-4 text-black">
+            Sign in to continue
           </h2>
-          <p className="text-sm text-neutral-500 leading-relaxed mb-8">
-            Para maka-checkout, kailangan mo munang mag-sign in o gumawa ng
-            account.
+
+          {/* Description */}
+          <p className="text-sm text-neutral-500 leading-relaxed mb-8 max-w-xs mx-auto">
+            Create an account or sign in to proceed with your order. It only
+            takes a minute.
           </p>
 
           {/* Buttons */}
@@ -87,10 +92,16 @@ export default function AuthPromptModal({
             </Link>
           </div>
 
-          {/* Footer Note */}
-          <p className="text-[10px] text-neutral-400 mt-6 leading-relaxed">
-            Kung may account ka na, i-sign in mo lang para ma-proceed yung order
-            mo.
+          {/* Footer */}
+          <p className="text-[11px] text-neutral-400 mt-8 leading-relaxed">
+            Already have an account?{' '}
+            <Link
+              href={`/login?redirect=${redirectTo}`}
+              className="font-bold text-black underline underline-offset-2 hover:opacity-60"
+            >
+              Sign in here
+            </Link>
+            .
           </p>
         </div>
       </div>

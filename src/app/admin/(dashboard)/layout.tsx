@@ -5,7 +5,17 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
-import { Menu, X, LayoutDashboard, Package, ShoppingBag, Globe, LogOut, Film } from 'lucide-react'
+import {
+  Menu,
+  X,
+  LayoutDashboard,
+  Package,
+  ShoppingBag,
+  Globe,
+  LogOut,
+  Film,
+  Folder,
+} from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 export default function AdminLayout({
@@ -52,11 +62,12 @@ export default function AdminLayout({
     router.refresh()
   }
 
-    const navItems = [
+  const navItems = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/admin/products', label: 'Products', icon: Package },
     { href: '/admin/orders', label: 'Orders', icon: ShoppingBag },
-    { href: '/admin/hero', label: 'Hero Media', icon: Film },   // ← IDAGDAG
+    { href: '/admin/hero', label: 'Hero Media', icon: Film },
+    { href: '/admin/collections', label: 'Collections', icon: Folder },
   ]
 
   const isActive = (href: string) => {
@@ -71,7 +82,6 @@ export default function AdminLayout({
       {/* ============================================ */}
       <header className="lg:hidden sticky top-0 z-40 bg-[#0A0A0A] border-b border-neutral-900">
         <div className="flex items-center justify-between px-4 py-4">
-          {/* Hamburger */}
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-2 -ml-2 hover:bg-neutral-900 rounded-sm transition-colors"
@@ -80,7 +90,6 @@ export default function AdminLayout({
             <Menu size={22} />
           </button>
 
-          {/* Logo */}
           <Link href="/admin" className="flex flex-col items-center">
             <span
               className="text-lg font-black tracking-tight"
@@ -93,17 +102,16 @@ export default function AdminLayout({
             </span>
           </Link>
 
-          {/* Spacer para pantay */}
           <div className="w-9" />
         </div>
       </header>
 
       {/* ============================================ */}
-      {/* MOBILE OVERLAY (click to close) */}
+      {/* MOBILE OVERLAY */}
       {/* ============================================ */}
       {sidebarOpen && (
         <div
-          className="lg:hidden fixed inset-0 z-40 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200"
+          className="lg:hidden fixed inset-0 z-40 bg-black/70 backdrop-blur-sm"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -120,9 +128,12 @@ export default function AdminLayout({
           lg:translate-x-0
         `}
       >
-        {/* Logo + Close button */}
         <div className="px-8 py-8 border-b border-neutral-900 flex items-center justify-between">
-          <Link href="/admin" className="block group" onClick={() => setSidebarOpen(false)}>
+          <Link
+            href="/admin"
+            className="block group"
+            onClick={() => setSidebarOpen(false)}
+          >
             <h1
               className="text-2xl font-black text-white group-hover:opacity-80 transition-opacity"
               style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
@@ -134,7 +145,6 @@ export default function AdminLayout({
             </p>
           </Link>
 
-          {/* Close button — mobile only */}
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden p-2 -mr-2 text-neutral-500 hover:text-white hover:bg-neutral-900 rounded-sm transition-colors"
@@ -144,7 +154,6 @@ export default function AdminLayout({
           </button>
         </div>
 
-        {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           <p className="px-4 py-3 text-[10px] font-bold text-neutral-600 uppercase tracking-[0.3em]">
             Main
@@ -162,9 +171,10 @@ export default function AdminLayout({
                   group flex items-center gap-3 px-4 py-3 
                   text-xs font-bold uppercase tracking-[0.15em] 
                   transition-all rounded-sm
-                  ${active 
-                    ? 'bg-white text-black' 
-                    : 'text-neutral-400 hover:text-white hover:bg-neutral-900'
+                  ${
+                    active
+                      ? 'bg-white text-black'
+                      : 'text-neutral-400 hover:text-white hover:bg-neutral-900'
                   }
                 `}
               >
@@ -200,7 +210,6 @@ export default function AdminLayout({
           </Link>
         </nav>
 
-        {/* User Section */}
         <div className="p-4 border-t border-neutral-900">
           <div className="flex items-center gap-3 px-4 py-3 mb-3">
             <div className="w-9 h-9 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-xs font-black text-neutral-400 flex-shrink-0">
@@ -228,9 +237,7 @@ export default function AdminLayout({
       {/* ============================================ */}
       {/* MAIN CONTENT */}
       {/* ============================================ */}
-      <main className="lg:ml-72 min-h-screen">
-        {children}
-      </main>
+      <main className="lg:ml-72 min-h-screen">{children}</main>
     </div>
   )
 }
