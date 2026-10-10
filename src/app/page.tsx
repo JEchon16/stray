@@ -10,8 +10,7 @@ import { useState, useEffect } from 'react'
 const LOGOS: string[][] = [
   ['NOSTAL'],
   ['MANILA'],
-  ['EST. 2026'],
-  ['FROM BROKE', 'TO BLING'],
+ 
 ]
 
 export default function LandingPage() {

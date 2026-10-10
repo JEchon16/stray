@@ -716,22 +716,7 @@ export default function ShopPage() {
                     New Arrivals
                   </Link>
                 </li>
-                <li>
-                  <Link
-                    href="/shop"
-                    className="hover:text-black transition-colors"
-                  >
-                    Best Sellers
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/shop"
-                    className="hover:text-black transition-colors"
-                  >
-                    Sale
-                  </Link>
-                </li>
+               
               </ul>
             </div>
 
@@ -750,11 +735,7 @@ export default function ShopPage() {
                     Shipping
                   </a>
                 </li>
-                <li>
-                  <a href="#" className="hover:text-black transition-colors">
-                    Returns
-                  </a>
-                </li>
+               
                 <li>
                   <Link
                     href="/contact"
