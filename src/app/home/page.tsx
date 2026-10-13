@@ -1,4 +1,4 @@
-// src/app/page.tsx
+// src/app/home/page.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -247,7 +247,7 @@ export default function HomePage() {
       </nav>
 
       {/* HERO SLIDER */}
-      <section className="relative h-[75vh] min-h-[500px] overflow-hidden bg-black">
+      <section className="relative h-screen min-h-[600px] overflow-hidden bg-black">
         {heroMedia.map((media, i) => (
           <div
             key={media.id}
@@ -256,7 +256,7 @@ export default function HomePage() {
             {media.type === 'video' ? (
               <video
                 src={media.url}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
                 autoPlay
                 loop
                 muted
@@ -266,7 +266,7 @@ export default function HomePage() {
               <img
                 src={media.url}
                 alt={media.alt_text || 'Hero'}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
             )}
           </div>
@@ -421,8 +421,8 @@ export default function HomePage() {
       </section>
 
       {/* COLLECTIONS */}
-      <section id="collections" className="py-24 px-6 bg-neutral-50">
-        <div className="max-w-7xl mx-auto">
+      <section id="collections" className="py-24 bg-neutral-50">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-[0.3em] mb-3">
               Collections
@@ -432,14 +432,15 @@ export default function HomePage() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+          {/* MOBILE — Horizontal Scroll */}
+          <div className="lg:hidden -mx-6 px-6 overflow-x-auto snap-x snap-mandatory flex gap-4 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {collections.map((collection) => (
               <Link
                 key={collection.id}
                 href={collection.link || '/shop'}
-                className="group relative overflow-hidden cursor-pointer block"
+                className="group relative overflow-hidden cursor-pointer block flex-shrink-0 w-[75vw] sm:w-[45vw] snap-start rounded-2xl"
               >
-                <div className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-200">
+                <div className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-200 rounded-2xl">
                   <img
                     src={collection.image_url}
                     alt=""
@@ -448,7 +449,42 @@ export default function HomePage() {
                       e.currentTarget.style.display = 'none'
                     }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent rounded-2xl" />
+                </div>
+
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/70 mb-2">
+                    {collection.status}
+                  </p>
+                  <h3 className="text-xl sm:text-2xl font-black text-white mb-4">
+                    {collection.name}
+                  </h3>
+                  <span className="inline-block text-[10px] font-bold uppercase tracking-[0.2em] text-white border-b-2 border-white pb-1 group-hover:border-neutral-400 transition-colors">
+                    Explore
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* DESKTOP — Grid */}
+          <div className="hidden lg:grid lg:grid-cols-3 gap-6">
+            {collections.map((collection) => (
+              <Link
+                key={collection.id}
+                href={collection.link || '/shop'}
+                className="group relative overflow-hidden cursor-pointer block rounded-2xl"
+              >
+                <div className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-200 rounded-2xl">
+                  <img
+                    src={collection.image_url}
+                    alt=""
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none'
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent rounded-2xl" />
                 </div>
 
                 <div className="absolute bottom-0 left-0 right-0 p-6">

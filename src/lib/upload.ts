@@ -17,9 +17,9 @@ async function uploadToBucket(
       return { url: null, error: 'File must be an image' }
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      return { url: null, error: 'File size must be less than 5MB' }
+       // Validate file size (max 20MB)
+    if (file.size > 20 * 1024 * 1024) {
+      return { url: null, error: 'File size must be less than 20MB' }
     }
 
     // Generate unique filename
@@ -113,13 +113,17 @@ export async function uploadHeroMedia(
       return { url: null, error: 'File must be an image or video' }
     }
 
-    const maxSize = isVideo ? 50 * 1024 * 1024 : 5 * 1024 * 1024
+        // Validate file size
+    // Image: max 20MB
+    // Video: max 50MB
+    const maxSize = isVideo ? 50 * 1024 * 1024 : 20 * 1024 * 1024
     if (file.size > maxSize) {
       return {
         url: null,
-        error: `File size must be less than ${isVideo ? '50MB' : '5MB'}`,
+        error: `File size must be less than ${isVideo ? '50MB' : '20MB'}`,
       }
     }
+    
 
     const ext = file.name.split('.').pop() || (isVideo ? 'mp4' : 'jpg')
     const timestamp = Date.now()

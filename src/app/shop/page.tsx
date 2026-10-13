@@ -221,7 +221,7 @@ export default function ShopPage() {
                 HOME
               </Link>
               <Link
-                href="/shop"
+                href="/home"
                 className="text-xs font-bold uppercase tracking-[0.15em] border-b border-black pb-0.5"
               >
                 SHOP

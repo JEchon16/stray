@@ -59,8 +59,8 @@ export default function AdminCollectionsPage() {
       return
     }
 
-    if (selectedFile.size > 5 * 1024 * 1024) {
-      setError('Max 5MB per image')
+        if (selectedFile.size > 20 * 1024 * 1024) {
+      setError('Max 20MB per image')
       return
     }
 
@@ -214,7 +214,7 @@ export default function AdminCollectionsPage() {
                         Click to upload
                       </p>
                       <p className="text-[10px] text-neutral-600">
-                        Max 5MB (JPG/PNG)
+                        Max 20MB (JPG/PNG)
                       </p>
                     </div>
                   )}

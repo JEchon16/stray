@@ -59,12 +59,23 @@ export default function AdminHeroPage() {
     const selectedFile = e.target.files?.[0]
     if (!selectedFile) return
 
-    // Validate
+    // Validate type
     const isImage = selectedFile.type.startsWith('image/')
     const isVideo = selectedFile.type.startsWith('video/')
 
     if (!isImage && !isVideo) {
       setError('File must be image or video')
+      return
+    }
+
+    // Validate size
+    const maxSize = isVideo ? 50 * 1024 * 1024 : 20 * 1024 * 1024 // 50MB video / 20MB image
+    if (selectedFile.size > maxSize) {
+      setError(
+        isVideo
+          ? 'Max 50MB per video'
+          : 'Max 20MB per image'
+      )
       return
     }
 
@@ -245,7 +256,7 @@ export default function AdminHeroPage() {
                         Click to upload
                       </p>
                       <p className="text-[10px] text-neutral-600">
-                        Image (5MB) o Video (50MB)
+                        Image (20MB) o Video (50MB)
                       </p>
                     </div>
                   )}
