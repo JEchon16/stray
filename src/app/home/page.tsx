@@ -247,7 +247,7 @@ export default function HomePage() {
       </nav>
 
       {/* HERO SLIDER */}
-      <section className="relative h-screen min-h-[600px] overflow-hidden bg-black">
+      <section className="relative h-[40vh] min-h-[300px] sm:h-[50vh] lg:h-screen lg:min-h-[600px] overflow-hidden bg-black">
         {heroMedia.map((media, i) => (
           <div
             key={media.id}
